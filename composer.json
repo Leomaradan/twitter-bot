@@ -1,0 +1,15 @@
+{
+    "name": "leomaradan/twitterbot",
+    "description": "L\u0000o Maradan's Personal Twitter Bot",
+    "type": "project",
+    "require": {
+        "vlucas/phpdotenv": "^3.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Léo Maradan",
+            "email": "3043485+Leomaradan@users.noreply.github.com"
+        }
+    ]
+}
