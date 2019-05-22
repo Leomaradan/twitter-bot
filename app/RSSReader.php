@@ -15,8 +15,6 @@ function getFeed($feed_url, DateTime $last) {
 
     $data = [];
 
-    //echo "<ul>";
-
     foreach($x->entry as $entry) {
         $date = new DateTime($entry->published);
         $recent = ($date > $last);
@@ -37,7 +35,7 @@ function getFeed($feed_url, DateTime $last) {
 
         if($recent) {
             $data[] = [
-                'url' => getAttribute($entry->link, 'href'),
+                'url' => $entry->id,
                 'text' => $description
             ];
         }

@@ -3,8 +3,8 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use Dotenv\Dotenv;
-echo '<pre>';
-//date_default_timezone_set('GMT');
+
+date_default_timezone_set('GMT');
 
 @mkdir(__DIR__ . '/tmp');
 
@@ -13,19 +13,6 @@ require('app/RSSReader.php');
 require('app/file_lock.php');
 
 $conf = require('conf.php');
-
-
-//header('Content-Type: text/html; charset=utf-8');
-
-/*
-
-
-$twitter = new TwitterBot('<Consumer_key>', '<Consumer_secret>');
-$twitter->setToken('<Access_token>', '<Access_token_secret>');
-
-$twitter->test();
-
-*/
 
 $twitters = [];
 
@@ -79,8 +66,3 @@ foreach($conf as $account => $confLine) {
 foreach($twitters as $twitter) {
     $twitter->run();
 }
-
-//var_dump($twitters);
-
-
-//$twitters['leomaradan']->run();

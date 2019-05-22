@@ -2,8 +2,6 @@
 
 function getSinceId($file, $format = null){
 
-    $file = null;
-
     $since_id = @file_get_contents(__DIR__ . '/../tmp/' . $file);
     if(!$since_id){
         switch($format) {
