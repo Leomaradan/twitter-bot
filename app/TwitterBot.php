@@ -50,17 +50,23 @@ class TwitterBot {
 
     public function sendTweet(){
         foreach($this->tweet as $tweet) {
-            $text = $tweet['text'];
-            $length = strlen($text) + 1;
+            try {
+                $text = $tweet['text'];
+                $length = strlen($text) + 1;
 
-            if($length - $this->shorturl_length > MAX_CHAR) {
-                $text = $this->elegantHyphenation($text);
+                if($length - $this->shorturl_length > MAX_CHAR) {
+                    $text = $this->elegantHyphenation($text);
+                }
+
+                $array = array( 'status' => $text . ' ' . $tweet['url'] );
+                $this->oauth->fetch($this->url_update, $array, OAUTH_HTTP_METHOD_POST);
+                echo date("Y-m-d H:i:s") . " SEND ".$array['status'] . PHP_EOL;
+            } catch(Exception $ex) {
+                var_dump($ex);
             }
-
-            $array = array( 'status' => $text . ' ' . $tweet['url'] );
-            $this->oauth->fetch($this->url_update, $array, OAUTH_HTTP_METHOD_POST);
-            echo date("Y-m-d H:i:s") . " SEND ".$array['status'] . PHP_EOL;
         }
+
+        echo date("Y-m-d H:i:s") . " DONE SEND_TWEET " . PHP_EOL;
     }
 
     public function retweet(){
