@@ -53,7 +53,8 @@ $conf = json_decode(json_encode(require('conf.php')), FALSE);
 
 // Validate
 $validator = new JsonSchema\Validator;
-$validator->validate($conf, (object)['$ref' => 'file://' . realpath('schema.json')]);
+$schema = file_get_contents('schema.json');
+$validator->validate($conf, (object)json_decode($schema));
 
 if (!$validator->isValid()) {
     $message = "The configuration does not validate. Violations:\n";
