@@ -53,7 +53,7 @@ $conf = json_decode(json_encode(require('conf.php')), FALSE);
 
 // Validate
 $validator = new JsonSchema\Validator;
-$schema = file_get_contents('schema.json');
+$schema = file_get_contents(__DIR__ . '/schema.json');
 $validator->validate($conf, (object)json_decode($schema));
 
 if (!$validator->isValid()) {
