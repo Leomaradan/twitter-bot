@@ -4,11 +4,11 @@ require __DIR__ . '/vendor/autoload.php';
 
 date_default_timezone_set('GMT');
 
-require('app/options.php');
-require('app/TwitterBot.php');
-require('app/RSSReader.php');
-require('app/file_lock.php');
-require('app/logger.php');
+require 'app/options.php';
+require 'app/TwitterBot.php';
+require 'app/RSSReader.php';
+require 'app/file_lock.php';
+require 'app/logger.php';
 
 $log = new Logger();
 
@@ -20,13 +20,13 @@ logDebug('--verbose: ' . $isVerbose);
 logDebug('--simulation: ' . $isSimulation);
 logDebug('--html: ' . $isHtml);
 
-if($options['html']) {
+if ($options['html']) {
     echo '<pre>';
 }
 
-if($options['help']) {
+if ($options['help']) {
     //"help" => false,
-   /* "verbose" => false,
+    /* "verbose" => false,
     "simulation" => true,
     //"accounts" => null,
     "html" => true,*/
@@ -47,14 +47,12 @@ if($options['help']) {
 
 @mkdir(__DIR__ . '/tmp');
 
-
-
-$conf = json_decode(json_encode(require('conf.php')), FALSE);
+$conf = json_decode(json_encode(require('conf.php')), false);
 
 // Validate
 $validator = new JsonSchema\Validator;
 $schema = file_get_contents(__DIR__ . '/schema.json');
-$validator->validate($conf, (object)json_decode($schema));
+$validator->validate($conf, (object) json_decode($schema));
 
 if (!$validator->isValid()) {
     $message = "The configuration does not validate. Violations:\n";
@@ -66,28 +64,26 @@ if (!$validator->isValid()) {
 
 $twitters = [];
 
-foreach($conf as $confLine) {
-
+foreach ($conf as $confLine) {
     $twitter = new TwitterBot($confLine->account, $confLine->tokens->api_key, $confLine->tokens->api_secret);
     $twitter->setToken($confLine->tokens->access_token, $confLine->tokens->access_secret);
 
     $twitters[$confLine->account] = $twitter;
 
-    if(isset($confLine->rss)) {
-        foreach($confLine->rss as $rss) {
+    if (isset($confLine->rss)) {
+        foreach ($confLine->rss as $rss) {
             $lock = getSinceId('lock-rss-' . $confLine->account, 'DateTime');
-            if(is_string($rss)) {
+            if (is_string($rss)) {
                 $feed = getFeed($rss, new DateTime($lock));
 
-                foreach($feed->data as $data) {
-                    $twitters[$confLine->account]->addTweet($data->url, $data->text, $data-hashtag);
+                foreach ($feed->data as $data) {
+                    $twitters[$confLine->account]->addTweet($data->url, $data->text, $data - hashtag);
                 }
             } else {
                 $parser = ($rss->parser) ?: null;
                 $feed = getFeed($rss->url, new DateTime($lock), $parser);
 
-                foreach($feed->data as $data) {
-
+                foreach ($feed->data as $data) {
                     $filter_input = ($rss->filter_hashtag_input) ?: [];
                     $filter_output = ($rss->filter_hashtag_output) ?: [];
 
@@ -95,16 +91,15 @@ foreach($conf as $confLine) {
                 }
             }
 
-            if(!$_ENV['simulation']) {
+            if (!$_ENV['simulation']) {
                 setSinceId('lock-rss-' . $confLine->account, $feed->last->format('Y-m-d H:i'));
             }
         }
-
     }
 
-    if(isset($confLine->retweet)) {
-        foreach($confLine->retweet as $retweet) {
-            if(is_string($retweet)) {
+    if (isset($confLine->retweet)) {
+        foreach ($confLine->retweet as $retweet) {
+            if (is_string($retweet)) {
                 $twitters[$confLine->account]->addRetweetAccount($retweet);
             } else {
                 $twitters[$confLine->account]->addRetweetAccount($retweet->screen, !!$retweet->response, !!$retweet->retweet);
@@ -113,6 +108,6 @@ foreach($conf as $confLine) {
     }
 }
 
-foreach($twitters as $twitter) {
+foreach ($twitters as $twitter) {
     $twitter->run();
 }

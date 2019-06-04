@@ -6,8 +6,9 @@ class Logger
     const Info = 1;
     const Debug = 2;
 
-    static function levelName($level) {
-        switch($level) {
+    public static function levelName($level)
+    {
+        switch ($level) {
             case Logger::Error:
                 return 'Error';
             case Logger::Info:
@@ -17,32 +18,33 @@ class Logger
         }
     }
 
-    function __construct() {
-        function logMessage($message, $level = Logger::Info) {
-            $log = date("Y-m-d H:i:s") . ' ' . Logger::levelName($level). ' : ' . $message . PHP_EOL;
-            if($_ENV['verbose']) {
+    public function __construct()
+    {
+        function logMessage($message, $level = Logger::Info)
+        {
+            $log = date("Y-m-d H:i:s") . ' ' . Logger::levelName($level) . ' : ' . $message . PHP_EOL;
+            if ($_ENV['verbose']) {
                 echo $log;
             } else {
-                if($level <= Logger::Info) {
-                    if($_ENV['verbose']) {
+                if ($level <= Logger::Info) {
+                    if ($_ENV['verbose']) {
                         echo $log;
                     }
                 }
             }
         }
 
-        function logError($message) {
+        function logError($message)
+        {
             logMessage($message, Logger::Error);
         }
-        function logInfo($message) {
+        function logInfo($message)
+        {
             logMessage($message, Logger::Info);
         }
-        function logDebug($message) {
+        function logDebug($message)
+        {
             logMessage($message, Logger::Debug);
         }
     }
 }
-
-
-
-

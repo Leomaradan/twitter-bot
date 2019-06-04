@@ -17,20 +17,22 @@ $defaultKeys = [
 
 $includeConfig = [];
 
-if(isset($daemonConfig)) {
+if (isset($daemonConfig)) {
     foreach ($defaultValues as $key => $value) {
-        if(isset($daemonConfig[$key])) {
+        if (isset($daemonConfig[$key])) {
             $includeConfig[$key] = $daemonConfig[$key];
         }
     }
 }
 
 $givenArguments = getopt("", $defaultKeys);
-if($givenArguments === false) {
+if ($givenArguments === false) {
     $givenArguments = [];
 }
 
-$givenArguments = array_map(function($item) { return !$item; }, $givenArguments);
+$givenArguments = array_map(function ($item) {
+    return !$item;
+}, $givenArguments);
 
 $inputs = filter_input_array(INPUT_GET, [
     'verbose' => ['filter' => FILTER_VALIDATE_BOOLEAN],
@@ -38,17 +40,18 @@ $inputs = filter_input_array(INPUT_GET, [
     'html' => ['filter' => FILTER_VALIDATE_BOOLEAN],
 ]);
 
-if($inputs == null) {
+if ($inputs == null) {
     $inputs = [];
 }
-$inputs = array_filter($inputs, function($var) { return $var !== null; });
+$inputs = array_filter($inputs, function ($var) {
+    return $var !== null;
+});
 
 $options = array_merge($defaultValues, $givenArguments, $inputs, $includeConfig);
 
 $_ENV['verbose'] = $options['verbose'];
 $_ENV['simulation'] = $options['simulation'];
 
-if($_ENV['simulation']) {
+if ($_ENV['simulation']) {
     $_ENV['verbose'] = true;
 }
-

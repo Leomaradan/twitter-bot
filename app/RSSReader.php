@@ -1,18 +1,20 @@
 <?php
 
-function getAttribute($object, $attribute) {
-    if(isset($object[$attribute]))
-    return (string) $object[$attribute];
+function getAttribute($object, $attribute)
+{
+    if (isset($object[$attribute])) {
+        return (string) $object[$attribute];
+    }
 }
 
-function getFeed($feed_url, DateTime $last, $parser = null) {
-
+function getFeed($feed_url, DateTime $last, $parser = null)
+{
     $content = file_get_contents($feed_url);
 
     $x = new SimpleXmlElement($content);
 
-    if($parser === null || $parser === 'auto') {
-        if($x->channel) {
+    if ($parser === null || $parser === 'auto') {
+        if ($x->channel) {
             $parser = 'rss';
         } else {
             $parser = 'atom';
@@ -21,7 +23,7 @@ function getFeed($feed_url, DateTime $last, $parser = null) {
 
     logDebug('Parser: ' . $parser);
 
-    switch($parser) {
+    switch ($parser) {
         case 'atom':
             $result = parser_atom($x, $last);
             break;
@@ -36,91 +38,89 @@ function getFeed($feed_url, DateTime $last, $parser = null) {
     }
 
     return $result;
-
 }
 
-function parser_atom($x, $last) {
+function parser_atom($x, $last)
+{
     $data = [];
     $newLast = $last;
 
-    foreach($x->entry as $entry) {
+    foreach ($x->entry as $entry) {
         $date = new DateTime($entry->published);
         $recent = ($date > $last);
         $newLast = ($date > $newLast) ? $date : $newLast;
 
-        $description = trim((string)$entry->content);
+        $description = trim((string) $entry->content);
 
         $hashtags = [];
 
-        foreach($entry->category as $category) {
-            $hashtags[] = (string)$category['term'];
+        foreach ($entry->category as $category) {
+            $hashtags[] = (string) $category['term'];
         }
 
-        if($recent) {
-            $data[] = (object)[
-                'url' => (string)$entry->link[0]['href'],
+        if ($recent) {
+            $data[] = (object) [
+                'url' => (string) $entry->link[0]['href'],
                 'text' => $description,
-                'hashtag' => $hashtags
+                'hashtag' => $hashtags,
             ];
         }
-
     }
 
-    return (object)[
-        'data' => (object)$data,
-        'last' => $newLast
+    return (object) [
+        'data' => (object) $data,
+        'last' => $newLast,
     ];
-
 }
 
-function parser_rss($x, $last) {
+function parser_rss($x, $last)
+{
     $data = [];
     $newLast = $last;
 
-    foreach($x->channel->item as $entry) {
+    foreach ($x->channel->item as $entry) {
         $date = new DateTime($entry->pubDate);
         $recent = ($date > $last);
         $newLast = ($date > $newLast) ? $date : $newLast;
 
-        $description = trim((string)$entry->description);
+        $description = trim((string) $entry->description);
 
         $hashtags = [];
 
-        foreach($entry->category as $category) {
-            $hashtags[] = (string)$category;
+        foreach ($entry->category as $category) {
+            $hashtags[] = (string) $category;
         }
 
-        if($recent) {
-            $data[] = (object)[
-                'url' => (string)$entry->link,
+        if ($recent) {
+            $data[] = (object) [
+                'url' => (string) $entry->link,
                 'text' => $description,
-                'hashtag' => $hashtags
+                'hashtag' => $hashtags,
             ];
         }
-
     }
 
-    return (object)[
-        'data' => (object)$data,
-        'last' => $newLast
+    return (object) [
+        'data' => (object) $data,
+        'last' => $newLast,
     ];
-
 }
 
-function parser_shaarli($x, $last) {
+function parser_shaarli($x, $last)
+{
     $data = [];
     $newLast = $last;
 
-    foreach($x->entry as $entry) {
+    foreach ($x->entry as $entry) {
         $date = new DateTime($entry->published);
         $recent = ($date > $last);
         $newLast = ($date > $newLast) ? $date : $newLast;
 
-        $html = new SimpleXmlElement((string)$entry->content);
+        $html = new SimpleXmlElement((string) $entry->content);
         $output = '';
 
-        foreach($html->p as $p) {
-            $output .= ' ' . (string)$p;
+        foreach ($html->p as $p) {
+            $output .= ' ' . (string) $p;
             $output = trim($output);
         }
 
@@ -129,24 +129,21 @@ function parser_shaarli($x, $last) {
 
         $hashtags = [];
 
-        foreach($entry->category as $category) {
-            $hashtags[] = (string)$category['term'];
+        foreach ($entry->category as $category) {
+            $hashtags[] = (string) $category['term'];
         }
 
-        if($recent) {
-            $data[] = (object)[
-                'url' => (string)$entry->id,
+        if ($recent) {
+            $data[] = (object) [
+                'url' => (string) $entry->id,
                 'text' => $description,
-                'hashtag' => $hashtags
+                'hashtag' => $hashtags,
             ];
         }
-
     }
 
-    return (object)[
-        'data' => (object)$data,
-        'last' => $newLast
+    return (object) [
+        'data' => (object) $data,
+        'last' => $newLast,
     ];
-
 }
-?>
