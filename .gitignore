@@ -1,5 +1,4 @@
 composer.phar
-.env
 conf.php
 /vendor/
 tmp/
