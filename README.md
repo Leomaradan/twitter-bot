@@ -1,5 +1,5 @@
 # Leomaradan's Twitter Bot
-## Auto-Tweeting from RSS and auto-retweet
+## Auto-tweeting from RSS and auto-retweet
 ----
 ### Installation
 
@@ -44,7 +44,7 @@ php daemon.php [--verbose] [--simulation] [--html]
 #### Browser
 you can call the script directly in a browser, and pass the options as query string
 ````url
-daemon.php?html=true&verbose&true
+daemon.php?html=true&verbose=true
 ````
 
 See the command line section for the availlable options
