@@ -10,6 +10,16 @@ require('app/RSSReader.php');
 require('app/file_lock.php');
 require('app/logger.php');
 
+$log = new Logger();
+
+$isVerbose = ($options['verbose']) ? 'true' : 'false';
+$isSimulation = ($options['simulation']) ? 'true' : 'false';
+$isHtml = ($options['html']) ? 'true' : 'false';
+
+logDebug('--verbose: ' . $isVerbose);
+logDebug('--simulation: ' . $isSimulation);
+logDebug('--html: ' . $isHtml);
+
 if($options['html']) {
     echo '<pre>';
 }
@@ -27,13 +37,17 @@ if($options['help']) {
     echo 'php daemon.php --help => This help command.' . PHP_EOL . PHP_EOL;
     echo 'Browser option:' . PHP_EOL . PHP_EOL;
     echo 'all options can be used is browser context' . PHP_EOL;
-    echo 'eg.: daemon.php?simulation=true&html=false' . PHP_EOL;
+    echo 'eg.: daemon.php?simulation=true&html=false' . PHP_EOL . PHP_EOL;
+    echo '"include" option:' . PHP_EOL . PHP_EOL;
+    echo 'If you want to include/require the daemon in another file, you can declare an array $daemonConfig. eg:' . PHP_EOL;
+    echo '$daemonConfig = [\'html\' => true];' . PHP_EOL;
+    echo 'require(\'daemon.php\');' . PHP_EOL;
     die;
 }
 
 @mkdir(__DIR__ . '/tmp');
 
-$log = new Logger();
+
 
 $conf = json_decode(json_encode(require('conf.php')), FALSE);
 

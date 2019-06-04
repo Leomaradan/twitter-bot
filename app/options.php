@@ -15,6 +15,16 @@ $defaultKeys = [
     "html::",
 ];
 
+$includeConfig = [];
+
+if(isset($daemonConfig)) {
+    foreach ($defaultValues as $key => $value) {
+        if(isset($daemonConfig[$key])) {
+            $includeConfig[$key] = $daemonConfig[$key];
+        }
+    }
+}
+
 $givenArguments = getopt("", $defaultKeys);
 if($givenArguments === false) {
     $givenArguments = [];
@@ -33,7 +43,7 @@ if($inputs == null) {
 }
 $inputs = array_filter($inputs, function($var) { return $var !== null; });
 
-$options = array_merge($defaultValues, $givenArguments, $inputs);
+$options = array_merge($defaultValues, $givenArguments, $inputs, $includeConfig);
 
 $_ENV['verbose'] = $options['verbose'];
 $_ENV['simulation'] = $options['simulation'];
