@@ -21,9 +21,10 @@ class TwitterBot {
     private $retweetAccount;
     private $tweet;
 
-    public function __construct($key, $secret){
+    public function __construct($account, $key, $secret){
         $this->oauth = new OAuth($key, $secret, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_URI);
         $this->oauth->disableSSLChecks();
+        $this->screenName = $account;
 
         $this->retweetAccount = [];
         $this->tweet = [];
@@ -33,12 +34,37 @@ class TwitterBot {
         $this->oauth->setToken($token, $secret);
     }
 
-    public function addRetweetAccount($screen){
-        $this->retweetAccount[] = array('screen' => $screen);
+    public function addRetweetAccount($screen, $response = false, $retweet = true){
+        logDebug("ADD Retweet Account $screen for source account " . $this->screenName);
+        $this->retweetAccount[] = (object)compact("screen", "response", "retweet");
     }
 
-    public function addTweet($url, $text) {
-        $this->tweet[] = ['url' => $url, 'text' => $text];
+    public function addTweet($url, $text, $hashtags, $include_permalink = true, $include_hashtags = false, $filter_input = [], $filter_output = []) {
+        foreach ($filter_input as $filter) {
+            if(in_array($filter, $hashtags)) {
+                logDebug('REJECTING TWEET : Output contains hashtag ' . $filter);
+                return;
+            }
+        }
+
+        foreach ($filter_output as $filter) {
+            if(in_array($filter, $hashtags)) {
+                $key = array_search($filter, $hashtags);
+                unset($hashtags[$key]);
+            }
+        }
+
+        $data = ['text' => $text];
+
+        if($include_permalink) {
+            $data['url'] = $url;
+        }
+
+        if($include_permalink) {
+            $data['hashtags'] = $hashtags;
+        }
+
+        $this->tweet[] = $data;
     }
 
     public function run() {
@@ -49,40 +75,84 @@ class TwitterBot {
     }
 
     public function sendTweet(){
+
+        logDebug("START SEND_TWEET");
+
         foreach($this->tweet as $tweet) {
             try {
                 $text = $tweet['text'];
                 $length = strlen($text) + 1;
 
-                if($length - $this->shorturl_length > MAX_CHAR) {
-                    $text = $this->elegantHyphenation($text);
+                if(isset($tweet['url'])) {
+                    $length -= $this->shorturl_length;
                 }
 
-                $array = array( 'status' => $text . ' ' . $tweet['url'] );
-                $this->oauth->fetch($this->url_update, $array, OAUTH_HTTP_METHOD_POST);
-                echo date("Y-m-d H:i:s") . " SEND ".$array['status'] . PHP_EOL;
+                if(isset($tweet['hashtags'])) {
+                    foreach ($tweet['hashtags'] as $hashtag) {
+                        $length -= strlen($hashtag) + 2;
+                    }
+                }
+
+                if($length > MAX_CHAR) {
+                    $text = $this->elegantHyphenation($text, isset($tweet['url']), $tweet['hashtags']);
+                }
+
+                $array = [ 'status' => $text ];
+
+                if(isset($tweet['hashtags'])) {
+                    foreach ($tweet['hashtags'] as $hashtag) {
+                        $array['status'] .= ' #' . $hashtag;
+                    }
+
+                }
+
+                if(isset($tweet['url'])) {
+                    $array['status'] .= ' ' . $tweet['url'];
+                }
+
+                if(!$_ENV['simulation']) {
+                    $this->oauth->fetch($this->url_update, $array, OAUTH_HTTP_METHOD_POST);
+                    logInfo("SEND " . $array['status']);
+                } else {
+                    logDebug('Simulation: fetch '.$this->url_update.' '.htmlentities($array['status']).' '.OAUTH_HTTP_METHOD_POST);
+                }
             } catch(Exception $ex) {
-                var_dump($ex);
+                logError(var_export($ex));
+
             }
         }
 
-        echo date("Y-m-d H:i:s") . " DONE SEND_TWEET " . PHP_EOL;
+        logDebug("DONE SEND_TWEET");
+
     }
 
     public function retweet(){
 
+        logDebug("START RETWEET");
         $since_id = getSinceId('lock-retweet-' . $this->screenName);
 
         $max_id = $since_id;
 
-        foreach ($this->retweetAccount as $key => $t){
+        foreach ($this->retweetAccount as $key => $retweetAccount){
 
-            $url = sprintf($this->user_timeline, $t['screen']);
+            $url = sprintf($this->user_timeline, $retweetAccount->screen);
             $this->oauth->fetch($url);
             $tweets = json_decode($this->oauth->getLastResponse());
             if($tweets){
 
                 foreach ($tweets as $tweet){
+
+                    if(!$retweetAccount->response) {
+                        if($tweet->in_reply_to_status_id != null) {
+                            continue;
+                        }
+                    }
+
+                    if(!$retweetAccount->retweet) {
+                        if(isset($tweet->retweeted_status)) {
+                            continue;
+                        }
+                    }
 
                     if ($tweet->id > $max_id){
                         $max_id = $tweet->id;
@@ -97,20 +167,38 @@ class TwitterBot {
 
                         if(!$tweet->retweeted) {
                             $url_retweet = sprintf($this->url_retweet, $tweet->id);
-                            $this->oauth->fetch($url_retweet, array(), OAUTH_HTTP_METHOD_POST);
-                            echo date("Y-m-d H:i:s") . " RT ".$tweet->text . PHP_EOL;
+                            if(!$_ENV['simulation']) {
+                                $this->oauth->fetch($url_retweet, array(), OAUTH_HTTP_METHOD_POST);
+                                logInfo("RT ".$tweet->text);
+                            } else {
+                                logDebug('Simulation: fetch '.$url_retweet.' [] '.OAUTH_HTTP_METHOD_POST);
+                            }
                         }
                     }
                 }
             }
         }
 
-        /* setting new max id */
-        setSinceId('lock-retweet-' . $this->screenName, $max_id);
+        if(!$_ENV['simulation']) {
+            /* setting new max id */
+            setSinceId('lock-retweet-' . $this->screenName, $max_id);
+        }
+
+        logDebug("END RETWEET");
     }
 
-    private function elegantHyphenation($string) {
-        $max = MAX_CHAR - $this->shorturl_length - 5;
+    private function elegantHyphenation($string, $useUrl, $hashtags) {
+        $max = MAX_CHAR - 5;
+
+        if($useUrl) {
+            $max -= $this->shorturl_length;
+        }
+
+        if(isset($hashtags)) {
+            foreach ($hashtags as $hashtag) {
+                $max -= strlen($hashtag) + 2;
+            }
+        }
 
         $words = explode(' ', $string);
 

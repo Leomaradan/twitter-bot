@@ -3,7 +3,7 @@
     "description": "L\u0000o Maradan's Personal Twitter Bot",
     "type": "project",
     "require": {
-        "vlucas/phpdotenv": "^3.3"
+        "justinrainbow/json-schema": "^5.2"
     },
     "license": "MIT",
     "authors": [
