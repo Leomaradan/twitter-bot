@@ -33,6 +33,9 @@ function getFeed($feed_url, DateTime $last, $parser = null)
         case 'shaarli':
             $result = parser_shaarli($x, $last);
             break;
+        case 'mastodon':
+            $result = parser_mastodon($x, $last);
+            break;
         default:
             throw new Exception("Invalid RSS parser");
     }
@@ -84,6 +87,40 @@ function parser_rss($x, $last)
         $newLast = ($date > $newLast) ? $date : $newLast;
 
         $description = trim((string) $entry->description);
+
+        $hashtags = [];
+
+        foreach ($entry->category as $category) {
+            $hashtags[] = (string) $category;
+        }
+
+        if ($recent) {
+            $data[] = (object) [
+                'url' => (string) $entry->link,
+                'text' => $description,
+                'hashtag' => $hashtags,
+            ];
+        }
+    }
+
+    return (object) [
+        'data' => (object) $data,
+        'last' => $newLast,
+    ];
+}
+
+function parser_mastodon($x, $last)
+{
+    $data = [];
+    $newLast = $last;
+
+    foreach ($x->channel->item as $entry) {
+
+        $date = new DateTime($entry->pubDate);
+        $recent = ($date > $last);
+        $newLast = ($date > $newLast) ? $date : $newLast;
+
+        $description = trim(htmlspecialchars_decode(strip_tags((string) $entry->description)));
 
         $hashtags = [];
 

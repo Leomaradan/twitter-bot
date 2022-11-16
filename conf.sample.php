@@ -29,11 +29,11 @@ return [
                 'url' => 'https://leomaradan.com/liens/?do=atom',
                 'include_permalink' => true, // include the permalink
                 'include_hashtags' => true, // include the hashtag
-                'parser' => 'shaarli', // the rss is a "shaarli" https://www.shaarli.fr/
+                'parser' => 'shaarli', // the rss is a "shaarli" https://www.shaarli.fr/. Allowed values for parser are : atom, rss, shaarli or mastodon
                 'filter_hashtag_input' => false, // don't filter any hashtag | if set, will ignore article with these hashtags
                 'filter_hashtag_output' => ['pro'], // filter hashtag output
             ] .
-            'https://other.exemple.com/rss', // another rss, in automatic mode
+                'https://other.exemple.com/rss', // another rss, in automatic mode
         ],
     ],
 ];
