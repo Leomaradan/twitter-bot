@@ -160,7 +160,7 @@
                   "title": "The Parser Schema",
                   "default": "auto",
                   "examples": ["rss"],
-                  "pattern": "^(atom|auto|rss|shaarli)$"
+                  "pattern": "^(atom|auto|rss|shaarli|mastodon)$"
                 },
                 "filter_hashtag_input": {
                   "$id": "#/items/properties/rss/items/properties/filter_hashtag_input",
