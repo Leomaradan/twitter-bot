@@ -101,23 +101,23 @@ class TwitterBot
                     $text = $this->elegantHyphenation($text, isset($tweet['url']), $tweet['hashtags']);
                 }
 
-                $array = [ 'status' => $text ];
+                $array = [ 'text' => $text ];
 
                 if (isset($tweet['hashtags'])) {
                     foreach ($tweet['hashtags'] as $hashtag) {
-                        $array['status'] .= ' #' . $hashtag;
+                        $array['text'] .= ' #' . $hashtag;
                     }
                 }
 
                 if (isset($tweet['url'])) {
-                    $array['status'] .= ' ' . $tweet['url'];
+                    $array['text'] .= ' ' . $tweet['url'];
                 }
 
                 if (!$_ENV['simulation']) {
                     $this->oauth->fetch($this->url_update, $array, OAUTH_HTTP_METHOD_POST);
-                    logInfo("SEND " . $array['status']);
+                    logInfo("SEND " . $array['text']);
                 } else {
-                    logDebug('Simulation: fetch '.$this->url_update.' '.htmlentities($array['status']).' '.OAUTH_HTTP_METHOD_POST);
+                    logDebug('Simulation: fetch '.$this->url_update.' '.htmlentities($array['text']).' '.OAUTH_HTTP_METHOD_POST);
                 }
             } catch (Exception $ex) {
                 logError(var_export($ex));
