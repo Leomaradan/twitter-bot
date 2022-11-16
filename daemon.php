@@ -65,19 +65,18 @@ if (!$validator->isValid()) {
 $twitters = [];
 
 foreach ($conf as $confLine) {
-    $twitter = new TwitterBot($confLine->account, $confLine->tokens->api_key, $confLine->tokens->api_secret);
-    $twitter->setToken($confLine->tokens->access_token, $confLine->tokens->access_secret);
+    $twitter = new TwitterBot($confLine->account_id, $confLine->tokens->api_key, $confLine->tokens->api_secret, $confLine->tokens->bearer_token, $confLine->tokens->access_token, $confLine->tokens->access_secret);
 
-    $twitters[$confLine->account] = $twitter;
+    $twitters[$confLine->account_id] = $twitter;
 
     if (isset($confLine->rss)) {
         foreach ($confLine->rss as $rss) {
-            $lock = getSinceId('lock-rss-' . $confLine->account, 'DateTime');
+            $lock = getSinceId('lock-rss-' . $confLine->account_id, 'DateTime');
             if (is_string($rss)) {
                 $feed = getFeed($rss, new DateTime($lock));
 
                 foreach ($feed->data as $data) {
-                    $twitters[$confLine->account]->addTweet($data->url, $data->text, $data - hashtag);
+                    $twitters[$confLine->account_id]->addTweet($data->url, $data->text, $data->hashtag);
                 }
             } else {
                 $parser = ($rss->parser) ?: null;
@@ -87,12 +86,12 @@ foreach ($conf as $confLine) {
                     $filter_input = ($rss->filter_hashtag_input) ?: [];
                     $filter_output = ($rss->filter_hashtag_output) ?: [];
 
-                    $twitters[$confLine->account]->addTweet($data->url, $data->text, $data->hashtag, $rss->include_permalink, $rss->include_hashtags, $filter_input, $filter_output);
+                    $twitters[$confLine->account_id]->addTweet($data->url, $data->text, $data->hashtag, $rss->include_permalink, $rss->include_hashtags, $filter_input, $filter_output);
                 }
             }
 
             if (!$_ENV['simulation']) {
-                setSinceId('lock-rss-' . $confLine->account, $feed->last->format('Y-m-d H:i'));
+                setSinceId('lock-rss-' . $confLine->account_id, $feed->last->format('Y-m-d H:i'));
             }
         }
     }
@@ -100,9 +99,9 @@ foreach ($conf as $confLine) {
     if (isset($confLine->retweet)) {
         foreach ($confLine->retweet as $retweet) {
             if (is_string($retweet)) {
-                $twitters[$confLine->account]->addRetweetAccount($retweet);
+                $twitters[$confLine->account_id]->addRetweetAccount($retweet);
             } else {
-                $twitters[$confLine->account]->addRetweetAccount($retweet->screen, !!$retweet->response, !!$retweet->retweet);
+                $twitters[$confLine->account_id]->addRetweetAccount($retweet->screen, !!$retweet->response, !!$retweet->retweet);
             }
         }
     }

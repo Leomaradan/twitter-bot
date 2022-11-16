@@ -1,240 +1,204 @@
 {
-    "definitions": {},
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "conf.sample.php",
-    "type": "array",
-    "title": "Configuration",
-    "items": {
-        "$id": "#/items",
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "conf.sample.php",
+  "type": "array",
+  "title": "Configuration",
+  "items": {
+    "$id": "#/items",
+    "type": "object",
+    "title": "The Accounts Schema",
+    "required": ["account_id", "tokens"],
+    "additionalProperties": false,
+    "properties": {
+      "account_id": {
+        "$id": "#/items/properties/account_id",
+        "type": "string",
+        "title": "The Account Schema",
+        "default": "",
+        "examples": ["1234"],
+        "pattern": "^(.*)$"
+      },
+      "tokens": {
+        "$id": "#/items/properties/tokens",
         "type": "object",
-        "title": "The Accounts Schema",
+        "title": "The Tokens Schema",
         "required": [
-            "account",
-            "tokens"
+          "api_key",
+          "api_secret",
+          "bearer_token",
+          "access_token",
+          "access_secret"
         ],
         "additionalProperties": false,
         "properties": {
-            "account": {
-                "$id": "#/items/properties/account",
-                "type": "string",
-                "title": "The Account Schema",
-                "default": "",
-                "examples": [
-                    "mcradane"
-                ],
-                "pattern": "^(.*)$"
-            },
-            "tokens": {
-                "$id": "#/items/properties/tokens",
-                "type": "object",
-                "title": "The Tokens Schema",
-                "required": [
-                    "api_key",
-                    "api_secret",
-                    "access_token",
-                    "access_secret"
-                ],
-                "additionalProperties": false,
-                "properties": {
-                    "api_key": {
-                        "$id": "#/items/properties/tokens/properties/api_key",
-                        "type": "string",
-                        "title": "The Api_key Schema",
-                        "default": "",
-                        "examples": [
-                            "ab12cf"
-                        ],
-                        "pattern": "^(.*)$"
-                    },
-                    "api_secret": {
-                        "$id": "#/items/properties/tokens/properties/api_secret",
-                        "type": "string",
-                        "title": "The Api_secret Schema",
-                        "default": "",
-                        "examples": [
-                            "ab12cf"
-                        ],
-                        "pattern": "^(.*)$"
-                    },
-                    "access_token": {
-                        "$id": "#/items/properties/tokens/properties/access_token",
-                        "type": "string",
-                        "title": "The Access_token Schema",
-                        "default": "",
-                        "examples": [
-                            "ab12cf"
-                        ],
-                        "pattern": "^(.*)$"
-                    },
-                    "access_secret": {
-                        "$id": "#/items/properties/tokens/properties/access_secret",
-                        "type": "string",
-                        "title": "The Access_secret Schema",
-                        "default": "",
-                        "examples": [
-                            "ab12cf"
-                        ],
-                        "pattern": "^(.*)$"
-                    }
-                }
-            },
-            "retweet": {
-                "$id": "#/items/properties/retweet",
-                "type": "array",
-                "title": "The Retweet Schema",
-                "items": {
-                    "anyOf": [
-                        {
-                            "$id": "#/items/properties/retweet/items",
-                            "type": "object",
-                            "title": "The Items Schema",
-                            "required": [
-                                "screen",
-                                "retweet",
-                                "response"
-                            ],
-                            "additionalProperties": false,
-                            "properties": {
-                                "screen": {
-                                    "$id": "#/items/properties/retweet/items/properties/screen",
-                                    "type": "string",
-                                    "title": "The Screen Schema",
-                                    "default": "",
-                                    "examples": [
-                                        "mcradane"
-                                    ],
-                                    "pattern": "^(.*)$"
-                                },
-                                "retweet": {
-                                    "$id": "#/items/properties/retweet/items/properties/retweet",
-                                    "type": "boolean",
-                                    "title": "The Retweet Schema",
-                                    "default": false,
-                                    "examples": [
-                                        true
-                                    ]
-                                },
-                                "response": {
-                                    "$id": "#/items/properties/retweet/items/properties/response",
-                                    "type": "boolean",
-                                    "title": "The Response Schema",
-                                    "default": false,
-                                    "examples": [
-                                        true
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "$id": "#/items/properties/retweet/items",
-                            "type": "string",
-                            "title": "The Items Schema"
-                        }
-                    ]
-                }
-            },
-            "rss": {
-                "anyOf": [
-                    {
-                        "$id": "#/items/properties/rss",
-                        "type": "array",
-                        "title": "The Rss Schema",
-                        "items": {
-                            "$id": "#/items/properties/rss/items",
-                            "type": "object",
-                            "title": "The Items Schema",
-                            "required": [
-                                "url",
-                                "include_permalink",
-                                "include_hashtags"
-                            ],
-                            "additionalProperties": false,
-                            "properties": {
-                                "url": {
-                                    "$id": "#/items/properties/rss/items/properties/url",
-                                    "type": "string",
-                                    "title": "The Url Schema",
-                                    "default": "",
-                                    "examples": [
-                                        "https://leomaradan.com/liens/?do=atom"
-                                    ],
-                                    "pattern": "^(.*)$"
-                                },
-                                "include_permalink": {
-                                    "$id": "#/items/properties/rss/items/properties/include_permalink",
-                                    "type": "boolean",
-                                    "title": "The Include_permalink Schema",
-                                    "default": false,
-                                    "examples": [
-                                        true
-                                    ]
-                                },
-                                "include_hashtags": {
-                                    "$id": "#/items/properties/rss/items/properties/include_hashtags",
-                                    "type": "boolean",
-                                    "title": "The Include_hashtags Schema",
-                                    "default": false,
-                                    "examples": [
-                                        true
-                                    ]
-                                },
-                                "parser": {
-                                    "$id": "#/items/properties/rss/items/properties/parser",
-                                    "type": "string",
-                                    "title": "The Parser Schema",
-                                    "default": "auto",
-                                    "examples": [
-                                        "rss"
-                                    ],
-                                    "pattern": "^(atom|auto|rss|shaarli)$"
-                                },
-                                "filter_hashtag_input": {
-                                    "$id": "#/items/properties/rss/items/properties/filter_hashtag_input",
-                                    "type": [
-                                        "array",
-                                        "boolean"
-                                    ],
-                                    "title": "The Filter_hashtag_input Schema",
-                                    "default": false,
-                                    "items": {
-                                        "$id": "#/items/properties/rss/items/properties/filter_hashtag_input/items",
-                                        "type": "string",
-                                        "title": "The Items Schema",
-                                        "default": "",
-                                        "examples": [
-                                            "pro"
-                                        ],
-                                        "pattern": "^([a-zA-Z]*)$"
-                                    }
-                                },
-                                "filter_hashtag_output": {
-                                    "$id": "#/items/properties/rss/items/properties/filter_hashtag_output",
-                                    "type": [
-                                        "array",
-                                        "boolean"
-                                    ],
-                                    "title": "The Filter_hashtag_output Schema",
-                                    "items": {
-                                        "$id": "#/items/properties/rss/items/properties/filter_hashtag_output/items",
-                                        "type": "string",
-                                        "title": "The Items Schema",
-                                        "default": "",
-                                        "examples": [
-                                            "pro"
-                                        ],
-                                        "pattern": "^([a-zA-Z]*)$"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "$id": "#/items/properties/rss",
-                        "type": "string",
-                        "title": "The Rss Schema"
-                    }
-                ]
-            }
+          "api_key": {
+            "$id": "#/items/properties/tokens/properties/api_key",
+            "type": "string",
+            "title": "The Api_key Schema",
+            "default": "",
+            "examples": ["ab12cf"],
+            "pattern": "^(.*)$"
+          },
+          "api_secret": {
+            "$id": "#/items/properties/tokens/properties/api_secret",
+            "type": "string",
+            "title": "The Api_secret Schema",
+            "default": "",
+            "examples": ["ab12cf"],
+            "pattern": "^(.*)$"
+          },
+          "bearer_token": {
+            "$id": "#/items/properties/tokens/properties/bearer_token",
+            "type": "string",
+            "title": "The Bearer_token Schema",
+            "default": "",
+            "examples": ["ab12cf"],
+            "pattern": "^(.*)$"
+          },
+          "access_token": {
+            "$id": "#/items/properties/tokens/properties/access_token",
+            "type": "string",
+            "title": "The Access_token Schema",
+            "default": "",
+            "examples": ["ab12cf"],
+            "pattern": "^(.*)$"
+          },
+          "access_secret": {
+            "$id": "#/items/properties/tokens/properties/access_secret",
+            "type": "string",
+            "title": "The Access_secret Schema",
+            "default": "",
+            "examples": ["ab12cf"],
+            "pattern": "^(.*)$"
+          }
         }
+      },
+      "retweet": {
+        "$id": "#/items/properties/retweet",
+        "type": "array",
+        "title": "The Retweet Schema",
+        "items": {
+          "anyOf": [
+            {
+              "$id": "#/items/properties/retweet/items",
+              "type": "object",
+              "title": "The Items Schema",
+              "required": ["screen", "retweet", "response"],
+              "additionalProperties": false,
+              "properties": {
+                "screen": {
+                  "$id": "#/items/properties/retweet/items/properties/screen",
+                  "type": "string",
+                  "title": "The Screen Schema",
+                  "default": "",
+                  "examples": ["mcradane"],
+                  "pattern": "^(.*)$"
+                },
+                "retweet": {
+                  "$id": "#/items/properties/retweet/items/properties/retweet",
+                  "type": "boolean",
+                  "title": "The Retweet Schema",
+                  "default": false,
+                  "examples": [true]
+                },
+                "response": {
+                  "$id": "#/items/properties/retweet/items/properties/response",
+                  "type": "boolean",
+                  "title": "The Response Schema",
+                  "default": false,
+                  "examples": [true]
+                }
+              }
+            },
+            {
+              "$id": "#/items/properties/retweet/items",
+              "type": "string",
+              "title": "The Items Schema"
+            }
+          ]
+        }
+      },
+      "rss": {
+        "anyOf": [
+          {
+            "$id": "#/items/properties/rss",
+            "type": "array",
+            "title": "The Rss Schema",
+            "items": {
+              "$id": "#/items/properties/rss/items",
+              "type": "object",
+              "title": "The Items Schema",
+              "required": ["url", "include_permalink", "include_hashtags"],
+              "additionalProperties": false,
+              "properties": {
+                "url": {
+                  "$id": "#/items/properties/rss/items/properties/url",
+                  "type": "string",
+                  "title": "The Url Schema",
+                  "default": "",
+                  "examples": ["https://leomaradan.com/liens/?do=atom"],
+                  "pattern": "^(.*)$"
+                },
+                "include_permalink": {
+                  "$id": "#/items/properties/rss/items/properties/include_permalink",
+                  "type": "boolean",
+                  "title": "The Include_permalink Schema",
+                  "default": false,
+                  "examples": [true]
+                },
+                "include_hashtags": {
+                  "$id": "#/items/properties/rss/items/properties/include_hashtags",
+                  "type": "boolean",
+                  "title": "The Include_hashtags Schema",
+                  "default": false,
+                  "examples": [true]
+                },
+                "parser": {
+                  "$id": "#/items/properties/rss/items/properties/parser",
+                  "type": "string",
+                  "title": "The Parser Schema",
+                  "default": "auto",
+                  "examples": ["rss"],
+                  "pattern": "^(atom|auto|rss|shaarli)$"
+                },
+                "filter_hashtag_input": {
+                  "$id": "#/items/properties/rss/items/properties/filter_hashtag_input",
+                  "type": ["array", "boolean"],
+                  "title": "The Filter_hashtag_input Schema",
+                  "default": false,
+                  "items": {
+                    "$id": "#/items/properties/rss/items/properties/filter_hashtag_input/items",
+                    "type": "string",
+                    "title": "The Items Schema",
+                    "default": "",
+                    "examples": ["pro"],
+                    "pattern": "^([a-zA-Z]*)$"
+                  }
+                },
+                "filter_hashtag_output": {
+                  "$id": "#/items/properties/rss/items/properties/filter_hashtag_output",
+                  "type": ["array", "boolean"],
+                  "title": "The Filter_hashtag_output Schema",
+                  "items": {
+                    "$id": "#/items/properties/rss/items/properties/filter_hashtag_output/items",
+                    "type": "string",
+                    "title": "The Items Schema",
+                    "default": "",
+                    "examples": ["pro"],
+                    "pattern": "^([a-zA-Z]*)$"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "$id": "#/items/properties/rss",
+            "type": "string",
+            "title": "The Rss Schema"
+          }
+        ]
+      }
     }
+  }
 }

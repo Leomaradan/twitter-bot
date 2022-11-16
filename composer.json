@@ -1,15 +1,22 @@
 {
-    "name": "leomaradan/twitterbot",
-    "description": "L\u0000o Maradan's Personal Twitter Bot",
-    "type": "project",
-    "require": {
-        "justinrainbow/json-schema": "^5.2"
-    },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Léo Maradan",
-            "email": "3043485+Leomaradan@users.noreply.github.com"
-        }
-    ]
+  "name": "leomaradan/twitterbot",
+  "description": "L\u0000o Maradan's Personal Twitter Bot",
+  "type": "project",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/Leomaradan/twitter-api-v2-php"
+    }
+  ],
+  "require": {
+    "justinrainbow/json-schema": "^5.2",
+    "noweh/twitter-api-v2-php": "dev-master as 2.2.2"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Léo Maradan",
+      "email": "3043485+Leomaradan@users.noreply.github.com"
+    }
+  ]
 }

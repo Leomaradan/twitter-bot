@@ -1,42 +1,42 @@
 <?php
 
+use \Noweh\TwitterApi\Client;
+
 const MAX_CHAR = 280;
 
 class TwitterBot
 {
-    protected $url_retweet = 'https://api.twitter.com/2/users/%s/retweets';
-    protected $url_user_lookup = 'https://api.twitter.com/2/users/by?usernames=%s';
-    protected $user_timeline = 'https://api.twitter.com/2/users/%s/tweets';
-    protected $url_update = 'https://api.twitter.com/2/tweets';
-    //protected $url_verify = 'https://api.twitter.com/1.1/account/verify_credentials.json';
-    //protected $url_config = 'https://api.twitter.com/1.1/help/configuration.json';
 
-    private $oauth;
     private $screenName;
-    private $id;
     private $shorturl_length;
 
     private $retweetAccount;
     private $tweet;
 
-    public function __construct($account, $key, $secret)
+    private $client;
+
+    public function __construct($account_id, $api_key, $api_secret, $bearer_token, $access_token, $access_secret)
     {
-        $this->oauth = new OAuth($key, $secret, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_URI);
-        $this->oauth->disableSSLChecks();
-        $this->screenName = $account;
-        $this->id = $account;
+        $settings = [
+            'account_id' => $account_id,
+            'consumer_key' => $api_key,
+            'consumer_secret' => $api_secret,
+            'bearer_token' => $bearer_token,
+            'access_token' => $access_token,
+            'access_token_secret' => $access_secret
+        ];
+
+        $this->client = new Client($settings);
+
+        $this->screenName = $this->client->userSearch()->findByIdOrUsername($account_id)->performRequest()->data->username;
 
         $this->retweetAccount = [];
         $this->tweet = [];
     }
 
-    public function setToken($token, $secret)
-    {
-        $this->oauth->setToken($token, $secret);
-    }
-
     public function addRetweetAccount($screen, $response = false, $retweet = true)
     {
+        var_dump($this->screenName);
         logDebug("ADD Retweet Account $screen for source account " . $this->screenName);
         $this->retweetAccount[] = (object)compact("screen", "response", "retweet");
     }
@@ -72,10 +72,8 @@ class TwitterBot
 
     public function run()
     {
-        //if ($this->verifyAccountWorks()) {
-            $this->retweet();
-            $this->sendTweet();
-        //}
+        $this->retweet();
+        $this->sendTweet();
     }
 
     public function sendTweet()
@@ -101,7 +99,7 @@ class TwitterBot
                     $text = $this->elegantHyphenation($text, isset($tweet['url']), $tweet['hashtags']);
                 }
 
-                $array = [ 'text' => $text ];
+                $array = ['text' => $text];
 
                 if (isset($tweet['hashtags'])) {
                     foreach ($tweet['hashtags'] as $hashtag) {
@@ -114,10 +112,10 @@ class TwitterBot
                 }
 
                 if (!$_ENV['simulation']) {
-                    $this->oauth->fetch($this->url_update, $array, OAUTH_HTTP_METHOD_POST);
+                    $this->client->tweet()->performRequest('POST', $array);
                     logInfo("SEND " . $array['text']);
                 } else {
-                    logDebug('Simulation: fetch '.$this->url_update.' '.htmlentities($array['text']).' '.OAUTH_HTTP_METHOD_POST);
+                    logDebug('Simulation: POST ' . htmlentities($array['text']));
                 }
             } catch (Exception $ex) {
                 logError(var_export($ex));
@@ -134,49 +132,54 @@ class TwitterBot
 
         $max_id = $since_id;
 
-        foreach ($this->retweetAccount as $key => $retweetAccount) {
-            $userId = $this->getUserId($retweetAccount->screen);
+        $userNames = [];
 
-            if($userId) {
-                $url = sprintf($this->user_timeline, $userId);
-                $this->oauth->fetch($url);
-                $tweets = json_decode($this->oauth->getLastResponse());
-                if ($tweets) {
-                    foreach ($tweets as $tweet) {
-                        if (!$retweetAccount->response) {
-                            if ($tweet->in_reply_to_status_id != null) {
-                                continue;
-                            }
-                        }
-    
-                        if (!$retweetAccount->retweet) {
-                            if (isset($tweet->retweeted_status)) {
-                                continue;
-                            }
-                        }
-    
-                        if ($tweet->id > $max_id) {
-                            $max_id = $tweet->id;
-                        }
-    
-                        $date = new DateTime($tweet->created_at);
-    
-                        $oneMonth = new DateTime();
-                        $oneMonth->sub(new DateInterval('P1M'));
-    
-                        if ($date > $oneMonth) {
-                            if (!$tweet->retweeted) {
-                                $url_retweet = sprintf($this->url_retweet, $this->id);
-                                if (!$_ENV['simulation']) {
-                                    $this->oauth->fetch($url_retweet, array(), OAUTH_HTTP_METHOD_POST);
-                                    logInfo("RT ".$tweet->text);
-                                } else {
-                                    logDebug('Simulation: fetch '.$url_retweet.' [] '.OAUTH_HTTP_METHOD_POST);
-                                }
-                            }
-                        }
+        foreach ($this->retweetAccount as $key => $retweetAccount) {
+            $userNames[] = $retweetAccount->screen;
+        }
+
+
+        $tweets = $this->client->tweetSearch()->showReferencedTweets()->showUserDetails()->addFilterOnUsernamesFrom($userNames)->performRequest();
+
+        foreach ($tweets->data as $tweet) {
+
+            $isRetweet = false;
+            $isResponseOrQuote = false;
+
+            if (isset($tweet->referenced_tweets)) {
+                foreach ($tweet->referenced_tweets as $referenced_tweet) {
+                    if ($referenced_tweet->type == 'replied_to' || $referenced_tweet->type == 'quoted') {
+                        $isResponseOrQuote = true;
+                    }
+
+                    if ($referenced_tweet->type == 'retweeted') {
+                        $isRetweet = true;
                     }
                 }
+            }
+
+
+            if (!$retweetAccount->response) {
+                if ($isResponseOrQuote) { // referenced_tweets.id
+                    continue;
+                }
+            }
+
+            if (!$retweetAccount->retweet) {
+                if ($isRetweet) { // data.referenced_tweets.id (if type=retweeted)
+                    continue;
+                }
+            }
+
+            if ($tweet->id > $max_id) {
+                $max_id = $tweet->id;
+            }
+
+            if (!$_ENV['simulation']) {
+                $this->client->retweet()->performRequest('POST', ['tweet_id' => $tweet->id]);
+                logInfo("RT " . $tweet->text);
+            } else {
+                logDebug('Simulation: RT ' . $tweet->id);
             }
         }
 
@@ -217,35 +220,5 @@ class TwitterBot
         }
 
         return trim($output) . ' ...';
-    }
-
-    /* private function verifyAccountWorks()
-    {
-        try {
-            $this->oauth->fetch($this->url_verify, array(), OAUTH_HTTP_METHOD_GET);
-            $response = json_decode($this->oauth->getLastResponse());
-            $this->screenName = $response->screen_name;
-
-            $this->oauth->fetch($this->url_config);
-            $response = json_decode($this->oauth->getLastResponse());
-            $this->shorturl_length = max($response->short_url_length, $response->short_url_length_https);
-
-            return true;
-        } catch (Exception $ex) {
-            return false;
-        }
-    } */
-
-    private function getUserId(string $screenName)
-    {
-        try {
-            $url_lookup = sprintf($this->url_user_lookup, $screenName);
-
-            $this->oauth->fetch($url_lookup, array(), OAUTH_HTTP_METHOD_GET);
-            $response = json_decode($this->oauth->getLastResponse());
-            return $response->id;
-        } catch (Exception $ex) {
-            
-        }
     }
 }

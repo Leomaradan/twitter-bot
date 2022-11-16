@@ -3,12 +3,13 @@
 // This configuration need to be validated with schema.json
 return [
     [
-        'account' => 'account1',
+        'account_id' => '1234',
         'tokens' => [
             'api_key' => 'abcd',
             'api_secret' => 'efgh',
-            'access_token' => 'ijkl',
-            'access_secret' => 'mnop',
+            'bearer_token' => 'ijkl',
+            'access_token' => 'mnop',
+            'access_secret' => 'qrst',
         ],
         'retweet' => [
             [
@@ -22,18 +23,6 @@ return [
                 'retweet' => false, // ignore retweet
                 'response' => false, // ignore response
             ],
-        ],
-    ],
-    [
-        'account' => 'account1',
-        'tokens' => [
-            'api_key' => 'dcba',
-            'api_secret' => 'hgfe',
-            'access_token' => 'lkji',
-            'access_secret' => 'ponm',
-        ],
-        'retweet' => [
-            'account_name4',
         ],
         'rss' => [
             [
