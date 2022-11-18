@@ -36,7 +36,6 @@ class TwitterBot
 
     public function addRetweetAccount($screen, $response = false, $retweet = true)
     {
-        var_dump($this->screenName);
         logDebug("ADD Retweet Account $screen for source account " . $this->screenName);
         $this->retweetAccount[] = (object)compact("screen", "response", "retweet");
     }

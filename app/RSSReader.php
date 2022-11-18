@@ -114,10 +114,17 @@ function parser_mastodon($x, $last)
     $data = [];
     $newLast = $last;
 
+
     foreach ($x->channel->item as $entry) {
 
+
         $date = new DateTime($entry->pubDate);
+        // Date manipulation, because Mastodon may include seconds in date format
+        $date = new DateTime($date->format('Y-m-d H:i'));
+
+        logDebug('RSS Article ' . $entry->link . ' PubDate is ' . $entry->pubDate);
         $recent = ($date > $last);
+
         $newLast = ($date > $newLast) ? $date : $newLast;
 
         $description = trim(htmlspecialchars_decode(strip_tags((string) $entry->description)));
@@ -129,6 +136,7 @@ function parser_mastodon($x, $last)
         }
 
         if ($recent) {
+            logDebug('RSS Article ' . $entry->link . ' is recent, it will be published');
             $data[] = (object) [
                 'url' => (string) $entry->link,
                 'text' => $description,

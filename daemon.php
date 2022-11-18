@@ -72,6 +72,8 @@ foreach ($conf as $confLine) {
     if (isset($confLine->rss)) {
         foreach ($confLine->rss as $rss) {
             $lock = getSinceId('lock-rss-' . $confLine->account_id, 'DateTime');
+
+            logDebug('RSS Lock for ' . $confLine->account_id . ' is ' . $lock);
             if (is_string($rss)) {
                 $feed = getFeed($rss, new DateTime($lock));
 
